@@ -7,7 +7,7 @@
 #include <QTimer>
 #include "Audio.h"
 #include "Audioinput.h"
-#include "/opt3/home/rschnic/projects/digihamlib/digihamlib.h"
+#include "../digihamlib/digihamlib.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -22,6 +22,9 @@ public:
     ~MainWindow();
 
 public slots:
+    void download_file(QString, bool u = false);
+    void url_downloaded(QString);
+    void file_downloaded(QString);
 
 private slots:
     void do_connect(void);
@@ -44,9 +47,14 @@ private slots:
     void process_dmr_ids();
     void process_nxdn_ids();
     void process_mode_change(QString);
+    void audioDeviceChanged(int);
+    void micDeviceChanged(int);
+    void audioDeviceChanged(QAudioDevice info,int rate,int channels);
+    void micDeviceChanged(QAudioDevice info,int rate,int channels);
+    void vocoderChanged(int);
+    void modemChanged(int);
 
 private:
-    void file_downloaded(QString);
     void save_settings();
     void process_settings();
     void check_host_files();

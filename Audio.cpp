@@ -237,7 +237,10 @@ void Audio::updateAudioDevices(QComboBox *comboBox)
 {
     devList = comboBox;
     if (comboBox != NULL)
+    {
         comboBox->clear();
+        comboBox->addItem("Default");
+    }
     const QList<QAudioDevice> devices = m_devices->audioOutputs();
     if (comboBox != NULL)
     {

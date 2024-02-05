@@ -41,6 +41,9 @@
         <height>16777215</height>
        </size>
       </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(56, 56, 56);</string>
+      </property>
       <property name="currentIndex">
        <number>0</number>
       </property>
@@ -223,10 +226,13 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_9">
            <property name="topMargin">
-            <number>0</number>
+            <number>5</number>
            </property>
            <property name="rightMargin">
             <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>5</number>
            </property>
            <item>
             <widget class="QLabel" name="m17CanLabel">
@@ -1561,6 +1567,27 @@ color: rgb(255, 255, 255);</string>
              <enum>QFrame::Raised</enum>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_10">
+             <property name="spacing">
+              <number>1</number>
+             </property>
+             <property name="topMargin">
+              <number>9</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="label_2">
+               <property name="font">
+                <font>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Callsign:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="callSignEdit"/>
+             </item>
              <item>
               <widget class="QLabel" name="label_25">
                <property name="font">
@@ -1751,7 +1778,7 @@ color: rgb(0, 190, 139);</string>
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="packageIDLabel">
+                <widget class="QLabel" name="label_49">
                  <property name="font">
                   <font>
                    <bold>true</bold>
@@ -1763,7 +1790,7 @@ color: rgb(0, 190, 139);</string>
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="PackageIDLabel">
+                <widget class="QLabel" name="packageIDLabel">
                  <property name="styleSheet">
                   <string notr="true">border-color: rgb(255, 255, 255);
 color: rgb(255, 170, 127);</string>
@@ -1932,18 +1959,22 @@ color: rgb(255, 170, 127);</string>
           </item>
           <item>
            <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0,0,0,0">
-            <item row="5" column="2">
-             <widget class="QLineEdit" name="cwIdTxLevelEdit"/>
-            </item>
-            <item row="6" column="5">
-             <widget class="QLineEdit" name="ysfTxLevelEdit"/>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_34">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_33">
               <property name="text">
-               <string>RX Offset</string>
+               <string>RX Freq</string>
               </property>
              </widget>
+            </item>
+            <item row="3" column="3">
+             <widget class="QLabel" name="label_43">
+              <property name="text">
+               <string>TX DC Offset</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="5">
+             <widget class="QLineEdit" name="txDcOffsetEdit"/>
             </item>
             <item row="4" column="3">
              <widget class="QLabel" name="label_44">
@@ -1952,21 +1983,87 @@ color: rgb(255, 170, 127);</string>
               </property>
              </widget>
             </item>
-            <item row="7" column="5">
-             <widget class="QLineEdit" name="nxdmTxLevelEdit"/>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_34">
+              <property name="text">
+               <string>RX Offset</string>
+              </property>
+             </widget>
             </item>
-            <item row="1" column="2">
-             <widget class="QLineEdit" name="rxOffsetEdit"/>
+            <item row="6" column="5">
+             <widget class="QLineEdit" name="ysfTxLevelEdit"/>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="label_40">
+              <property name="text">
+               <string>DMRTXLevel</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
+             <widget class="QLabel" name="label_35">
+              <property name="text">
+               <string>TX Offset</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="label_39">
+              <property name="text">
+               <string>CWIdTXLevel</string>
+              </property>
+             </widget>
             </item>
             <item row="5" column="5">
              <widget class="QLineEdit" name="dstarTxLevelEdit"/>
             </item>
-            <item row="7" column="0">
-             <widget class="QLabel" name="label_41">
-              <property name="text">
-               <string>P25TXLevel</string>
+            <item row="4" column="2">
+             <widget class="QLineEdit" name="rfLevelEdit"/>
+            </item>
+            <item row="0" column="5">
+             <widget class="QLineEdit" name="txFreqEdit">
+              <property name="minimumSize">
+               <size>
+                <width>130</width>
+                <height>0</height>
+               </size>
               </property>
              </widget>
+            </item>
+            <item row="5" column="2">
+             <widget class="QLineEdit" name="cwIdTxLevelEdit"/>
+            </item>
+            <item row="6" column="3">
+             <widget class="QLabel" name="label_46">
+              <property name="text">
+               <string>YSFTXLevel</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_36">
+              <property name="text">
+               <string>RX Level</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="2">
+             <widget class="QLineEdit" name="p25TxLevelEdit"/>
+            </item>
+            <item row="7" column="5">
+             <widget class="QLineEdit" name="nxdnTxLevelEdit"/>
+            </item>
+            <item row="2" column="2">
+             <widget class="QLineEdit" name="rxLevelEdit"/>
+            </item>
+            <item row="3" column="2">
+             <widget class="QLineEdit" name="rxDcOffsetEdit"/>
+            </item>
+            <item row="1" column="5">
+             <widget class="QLineEdit" name="txOffsetEdit"/>
+            </item>
+            <item row="6" column="2">
+             <widget class="QLineEdit" name="dmrTxLevelEdit"/>
             </item>
             <item row="0" column="2">
              <widget class="QLineEdit" name="rxFreqEdit">
@@ -1985,51 +2082,8 @@ color: rgb(255, 170, 127);</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="3">
-             <widget class="QLabel" name="label_35">
-              <property name="text">
-               <string>TX Offset</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="2">
-             <widget class="QLineEdit" name="rxLevelEdit"/>
-            </item>
             <item row="2" column="5">
              <widget class="QLineEdit" name="txLevelEdit"/>
-            </item>
-            <item row="3" column="5">
-             <widget class="QLineEdit" name="txDcOffsetEdit"/>
-            </item>
-            <item row="3" column="2">
-             <widget class="QLineEdit" name="rxDcOffsetEdit"/>
-            </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="label_38">
-              <property name="text">
-               <string>RF Level</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="0">
-             <widget class="QLabel" name="label_40">
-              <property name="text">
-               <string>DMRTXLevel</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="5">
-             <widget class="QLineEdit" name="txDelayEdit"/>
-            </item>
-            <item row="0" column="5">
-             <widget class="QLineEdit" name="txFreqEdit">
-              <property name="minimumSize">
-               <size>
-                <width>130</width>
-                <height>0</height>
-               </size>
-              </property>
-             </widget>
             </item>
             <item row="3" column="0">
              <widget class="QLabel" name="label_37">
@@ -2038,17 +2092,27 @@ color: rgb(255, 170, 127);</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_36">
+            <item row="7" column="0">
+             <widget class="QLabel" name="label_41">
               <property name="text">
-               <string>RX Level</string>
+               <string>P25TXLevel</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="3">
-             <widget class="QLabel" name="label_43">
+            <item row="4" column="5">
+             <widget class="QLineEdit" name="txDelayEdit"/>
+            </item>
+            <item row="7" column="3">
+             <widget class="QLabel" name="label_47">
               <property name="text">
-               <string>TX DC Offset</string>
+               <string>NXDNTXLevel</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="label_38">
+              <property name="text">
+               <string>RF Level</string>
               </property>
              </widget>
             </item>
@@ -2059,6 +2123,9 @@ color: rgb(255, 170, 127);</string>
               </property>
              </widget>
             </item>
+            <item row="1" column="2">
+             <widget class="QLineEdit" name="rxOffsetEdit"/>
+            </item>
             <item row="5" column="3">
              <widget class="QLabel" name="label_45">
               <property name="text">
@@ -2066,45 +2133,26 @@ color: rgb(255, 170, 127);</string>
               </property>
              </widget>
             </item>
-            <item row="6" column="3">
-             <widget class="QLabel" name="label_46">
+            <item row="8" column="5">
+             <widget class="QCheckBox" name="pttInvertCB">
               <property name="text">
-               <string>YSFTXLevel</string>
+               <string>PTT Invert</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="5">
-             <widget class="QLineEdit" name="txOffsetEdit"/>
-            </item>
-            <item row="7" column="3">
-             <widget class="QLabel" name="label_47">
+            <item row="8" column="0">
+             <widget class="QCheckBox" name="rxInvertCB">
               <property name="text">
-               <string>NXDMTXLevel</string>
+               <string>RX Invert</string>
               </property>
              </widget>
             </item>
-            <item row="6" column="2">
-             <widget class="QLineEdit" name="dmrTxLevelEdit"/>
-            </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_33">
+            <item row="8" column="2">
+             <widget class="QCheckBox" name="txInvertCB">
               <property name="text">
-               <string>RX Freq</string>
+               <string>TX Invert</string>
               </property>
              </widget>
-            </item>
-            <item row="4" column="2">
-             <widget class="QLineEdit" name="rfLevelEdit"/>
-            </item>
-            <item row="5" column="0">
-             <widget class="QLabel" name="label_39">
-              <property name="text">
-               <string>CWIdTXLevel</string>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="2">
-             <widget class="QLineEdit" name="p25TxLevelEdit"/>
             </item>
            </layout>
           </item>

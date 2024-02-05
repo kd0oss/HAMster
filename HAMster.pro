@@ -12,6 +12,7 @@ SOURCES += \
     Audio.cpp \
     Audioinput.cpp \
     G711A.cpp \
+    httpmanager.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -20,6 +21,7 @@ HEADERS += \
     Audioinput.h \
     G711A.h \
     cusdr_queue.h \
+    httpmanager.h \
     mainwindow.h
 
 FORMS += \
