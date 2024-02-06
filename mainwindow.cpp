@@ -2,6 +2,9 @@
 #include "ui_mainwindow.h"
 #include "httpmanager.h"
 #include <QtCore>
+#include <QSerialPortInfo>
+
+#define ENDLINE "\n"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -79,59 +82,59 @@ void MainWindow::save_settings()
     //m_settings->setValue("PLAYBACK", ui->comboPlayback->currentText());
     //m_settings->setValue("CAPTURE", ui->comboCapture->currentText());
     m_settings->setValue("IPV6", digihamlib->get_ipv6());
-    m_settings->setValue("MODE", digihamlib->get_mode());
-    m_settings->setValue("HOST", digihamlib->get_reflector());
-    m_settings->setValue("MODULE", digihamlib->get_module());
-    m_settings->setValue("CALLSIGN", digihamlib->get_callsign());
-    m_settings->setValue("DMRID", digihamlib->get_dmrid());
-    m_settings->setValue("ESSID", digihamlib->get_essid());
-    m_settings->setValue("BMPASSWORD", digihamlib->get_bm_password());
-    m_settings->setValue("TGIFPASSWORD", digihamlib->get_tgif_password());
-    m_settings->setValue("DMRTGID", digihamlib->get_dmrtgid());
-    m_settings->setValue("DMRLAT", digihamlib->get_latitude());
-    m_settings->setValue("DMRLONG", digihamlib->get_longitude());
-    m_settings->setValue("DMRLOC", digihamlib->get_location());
-    m_settings->setValue("DMRDESC", digihamlib->get_description());
+    m_settings->setValue("MODE", ui->modeCombo->currentText());
+    m_settings->setValue("HOST", ui->reflectorCombo->currentText());
+    m_settings->setValue("MODULE", ui->moduleCombo->currentText());
+    m_settings->setValue("CALLSIGN", ui->callSignEdit->text());
+    m_settings->setValue("DMRID", ui->dmrIdEdit->text());
+    m_settings->setValue("ESSID", QString("%1").arg(ui->essidSpinBox->value()));
+    m_settings->setValue("BMPASSWORD", ui->bmPasswordEdit->text());
+    m_settings->setValue("TGIFPASSWORD", ui->tgifPasswordEdit->text());
+    m_settings->setValue("DMRTGID", ui->tgidEdit->text());
+    m_settings->setValue("DMRLAT", ui->latitudeEdit->text());
+    m_settings->setValue("DMRLONG", ui->longitudeEdit->text());
+    m_settings->setValue("DMRLOC", ui->locationEdit->text());
+    m_settings->setValue("DMRDESC", ui->descriptionEdit->text());
     m_settings->setValue("DMRFREQ", digihamlib->get_freq());
-    m_settings->setValue("DMRURL", digihamlib->get_url());
-    m_settings->setValue("DMRSWID", digihamlib->get_swid());
-    m_settings->setValue("DMRPKGID", digihamlib->get_pkgid());
-    m_settings->setValue("DMROPTS", digihamlib->get_dmr_options());
-    m_settings->setValue("MYCALL", digihamlib->get_mycall());
-    m_settings->setValue("URCALL", digihamlib->get_urcall());
-    m_settings->setValue("RPTR1", digihamlib->get_rptr1());
-    m_settings->setValue("RPTR2", digihamlib->get_rptr2());
-    m_settings->setValue("TXTIMEOUT", digihamlib->get_txtimeout());
+    m_settings->setValue("DMRURL", ui->urlEdit->text());
+    m_settings->setValue("DMRSWID", ui->softwareIDLabel->text());
+    m_settings->setValue("DMRPKGID", ui->packageIDLabel->text());
+    m_settings->setValue("DMROPTS", ui->dmrPlusOptsEdit->text());
+    m_settings->setValue("MYCALL", ui->myCallEdit->text());
+    m_settings->setValue("URCALL", ui->urCallEdit->text());
+    m_settings->setValue("RPTR1", ui->rptr1Edit->text());
+    m_settings->setValue("RPTR2", ui->rptr2Edit->text());
+    m_settings->setValue("TXTIMEOUT", QString("%1").arg(ui->txTimeoutSpin->value()));
  //   m_settings->setValue("TXTOGGLE", m_toggletx ? "true" : "false");
     m_settings->setValue("XRF2REF", digihamlib->get_xrf2ref());
-    m_settings->setValue("USRTXT", digihamlib->get_dstarusertxt());
+    m_settings->setValue("USRTXT", ui->slowSpeedDataEdit->text());
 //    m_settings->setValue("IAXUSER", m_iaxuser);
 //    m_settings->setValue("IAXPASS", m_iaxpassword);
 //    m_settings->setValue("IAXNODE", m_iaxnode);
 //    m_settings->setValue("IAXHOST", m_iaxhost);
 //    m_settings->setValue("IAXPORT", m_iaxport);
 
-    m_settings->setValue("ModemRxFreq", digihamlib->get_modemRxFreq());
-    m_settings->setValue("ModemTxFreq", digihamlib->get_modemTxFreq());
-    m_settings->setValue("ModemRxOffset", digihamlib->get_modemRxOffset());
-    m_settings->setValue("ModemTxOffset", digihamlib->get_modemTxOffset());
-    m_settings->setValue("ModemRxDCOffset", digihamlib->get_modemRxDCOffset());
-    m_settings->setValue("ModemTxDCOffset", digihamlib->get_modemTxDCOffset());
-    m_settings->setValue("ModemRxLevel", digihamlib->get_modemRxLevel());
-    m_settings->setValue("ModemTxLevel", digihamlib->get_modemTxLevel());
-    m_settings->setValue("ModemRFLevel", digihamlib->get_modemRFLevel());
-    m_settings->setValue("ModemTxDelay", digihamlib->get_modemTxDelay());
-    m_settings->setValue("ModemCWIdTxLevel", digihamlib->get_modemCWIdTxLevel());
-    m_settings->setValue("ModemDstarTxLevel", digihamlib->get_modemDstarTxLevel());
-    m_settings->setValue("ModemDMRTxLevel", digihamlib->get_modemDMRTxLevel());
-    m_settings->setValue("ModemYSFTxLevel", digihamlib->get_modemYSFTxLevel());
-    m_settings->setValue("ModemP25TxLevel", digihamlib->get_modemP25TxLevel());
-    m_settings->setValue("ModemNXDNTxLevel", digihamlib->get_modemNXDNTxLevel());
-    m_settings->setValue("ModemBaud", digihamlib->get_modemBaud());
-    m_settings->setValue("ModemM17CAN", digihamlib->get_modemM17CAN());
-    m_settings->setValue("ModemTxInvert", digihamlib->get_modemTxInvert());
-    m_settings->setValue("ModemRxInvert", digihamlib->get_modemRxInvert());
-    m_settings->setValue("ModemPTTInvert", digihamlib->get_modemPTTInvert());
+    m_settings->setValue("ModemRxFreq", ui->rxFreqEdit->text());
+    m_settings->setValue("ModemTxFreq", ui->txFreqEdit->text());
+    m_settings->setValue("ModemRxOffset", ui->rxOffsetEdit->text());
+    m_settings->setValue("ModemTxOffset", ui->txOffsetEdit->text());
+    m_settings->setValue("ModemRxDCOffset", ui->rxDcOffsetEdit->text());
+    m_settings->setValue("ModemTxDCOffset", ui->txDcOffsetEdit->text());
+    m_settings->setValue("ModemRxLevel", ui->rxLevelEdit->text());
+    m_settings->setValue("ModemTxLevel", ui->txLevelEdit->text());
+    m_settings->setValue("ModemRFLevel", ui->rfLevelEdit->text());
+    m_settings->setValue("ModemTxDelay", ui->txDelayEdit->text());
+    m_settings->setValue("ModemCWIdTxLevel", ui->cwIdTxLevelEdit->text());
+    m_settings->setValue("ModemDstarTxLevel", ui->dstarTxLevelEdit->text());
+    m_settings->setValue("ModemDMRTxLevel", ui->dmrTxLevelEdit->text());
+    m_settings->setValue("ModemYSFTxLevel", ui->ysfTxLevelEdit->text());
+    m_settings->setValue("ModemP25TxLevel", ui->p25TxLevelEdit->text());
+    m_settings->setValue("ModemNXDNTxLevel", ui->nxdnTxLevelEdit->text());
+    m_settings->setValue("ModemBaud", ui->modemBaudCombo->currentText());
+    m_settings->setValue("ModemM17CAN", ui->m17CanCombo->currentText());
+    m_settings->setValue("ModemTxInvert", QString("%1").arg(ui->txInvertCB->isChecked()));
+    m_settings->setValue("ModemRxInvert", QString("%1").arg(ui->rxInvertCB->isChecked()));
+    m_settings->setValue("ModemPTTInvert", QString("%1").arg(ui->pttInvertCB->isChecked()));
 }
 
 void MainWindow::process_settings()
@@ -225,7 +228,7 @@ void MainWindow::process_settings()
     digihamlib->set_modemPTTInvert((m_settings->value("ModemPTTInvert", "true").toString().simplified() == "true") ? true : false);
     ui->pttInvertCB->setChecked(digihamlib->get_modemPTTInvert());
 
-    process_mode_change(m_settings->value("MODE").toString().simplified());
+    process_mode_change(m_settings->value("MODE", "M17").toString().simplified());
     digihamlib->set_reflector(m_settings->value("HOST").toString().simplified());
     digihamlib->set_module(m_settings->value("MODULE").toString().simplified());
     ui->moduleCombo->setCurrentText(digihamlib->get_module());
@@ -761,8 +764,11 @@ void MainWindow::check_host_files()
 
 void MainWindow::process_mode_change(QString m)
 {
-    m_protocol = m;
-    digihamlib->set_protocol(m);
+    if (m.contains(" "))
+        m_protocol = m.split(" ").at(1);
+    else
+        m_protocol = m;
+    digihamlib->set_protocol(m_protocol);
     ui->tgidEdit->setVisible(false);
     ui->tgidLabel->setVisible(false);
     ui->m17CanLabel->setVisible(false);
@@ -774,24 +780,24 @@ void MainWindow::process_mode_change(QString m)
     ui->colorCodeLabel->setVisible(false);
     ui->colorCodeCombo->setVisible(false);
 
-    digihamlib->set_protocol(m);
+    digihamlib->set_protocol(m_protocol);
 
-    if ((m == "REF") || (m == "DCS") || (m == "XRF"))
+    if ((m_protocol == "REF") || (m_protocol == "DCS") || (m_protocol == "XRF"))
     {
-        process_dstar_hosts(m);
+        process_dstar_hosts(m_protocol);
         ui->moduleLabel->setVisible(true);
         ui->moduleCombo->setVisible(true);
         ui->moduleCombo->setCurrentText(digihamlib->get_module());
     }
-    if (m == "YSF")
+    if (m_protocol == "YSF")
     {
         process_ysf_hosts();
     }
-    if (m == "FCS")
+    if (m_protocol == "FCS")
     {
         process_fcs_rooms();
     }
-    if (m == "DMR")
+    if (m_protocol == "DMR")
     {
         process_dmr_hosts();
         ui->tgidEdit->setVisible(true);
@@ -804,18 +810,18 @@ void MainWindow::process_mode_change(QString m)
         ui->colorCodeCombo->setVisible(true);
         //process_dmr_ids();
     }
-    if (m == "P25")
+    if (m_protocol == "P25")
     {
         process_p25_hosts();
         ui->tgidEdit->setVisible(true);
         ui->tgidLabel->setVisible(true);
         ui->tgidEdit->setText(digihamlib->get_dmrtgid());
     }
-    if (m == "NXDN")
+    if (m_protocol == "NXDN")
     {
         process_nxdn_hosts();
     }
-    if (m == "M17")
+    if (m_protocol == "M17")
     {
         process_m17_hosts();
         ui->m17CanLabel->setVisible(true);
@@ -824,7 +830,7 @@ void MainWindow::process_mode_change(QString m)
         ui->moduleCombo->setVisible(true);
         ui->moduleCombo->setCurrentText(digihamlib->get_module());
     }
-    if (m == "IAX")
+    if (m_protocol == "IAX")
     {
     }
     ui->reflectorCombo->clear();
@@ -844,8 +850,7 @@ void MainWindow::discover_devices()
     digihamlib->m_modems.append("None");
     ui->modemCombo->addItem("None");
 #if !defined(Q_OS_IOS)
-    digihamlib->m_ambedev = new SerialAMBE("M17");
-    QMap<QString, QString> l = digihamlib->m_ambedev->discover_devices();//SerialAMBE::discover_devices();
+    QMap<QString, QString> l = discover_serial_devices();
     QMap<QString, QString>::const_iterator i = l.constBegin();
 
     while (i != l.constEnd())
@@ -856,8 +861,40 @@ void MainWindow::discover_devices()
         ui->modemCombo->addItem(i.value());
         ++i;
     }
-    delete digihamlib->m_ambedev;
 #endif
+}
+
+QMap<QString, QString> MainWindow::discover_serial_devices()
+{
+    QMap<QString, QString> devlist;
+    const QString blankString = "N/A";
+    QString out;
+#ifndef Q_OS_ANDROID
+    const auto serialPortInfos = QSerialPortInfo::availablePorts();
+
+    if (serialPortInfos.count())
+    {
+        for (const QSerialPortInfo &serialPortInfo : serialPortInfos)
+        {
+            out = "Port: " + serialPortInfo.portName() + ENDLINE
+                  + "Location: " + serialPortInfo.systemLocation() + ENDLINE
+                  + "Description: " + (!serialPortInfo.description().isEmpty() ? serialPortInfo.description() : blankString) + ENDLINE
+                  + "Manufacturer: " + (!serialPortInfo.manufacturer().isEmpty() ? serialPortInfo.manufacturer() : blankString) + ENDLINE
+                  + "Serial number: " + (!serialPortInfo.serialNumber().isEmpty() ? serialPortInfo.serialNumber() : blankString) + ENDLINE
+                  + "Vendor Identifier: " + (serialPortInfo.hasVendorIdentifier() ? QByteArray::number(serialPortInfo.vendorIdentifier(), 16) : blankString) + ENDLINE
+                  + "Product Identifier: " + (serialPortInfo.hasProductIdentifier() ? QByteArray::number(serialPortInfo.productIdentifier(), 16) : blankString) + ENDLINE;
+            //fprintf(stderr, "%s", out.toStdString().c_str());fflush(stderr);
+            devlist[serialPortInfo.systemLocation()] = serialPortInfo.description() + ":" + serialPortInfo.systemLocation();
+        }
+    }
+#else
+    QStringList list = AndroidSerialPort::GetInstance().discover_devices();
+    for ( const auto& i : list  )
+    {
+        devlist[i] = i;
+    }
+#endif
+    return devlist;
 }
 
 void MainWindow::do_connect(void)

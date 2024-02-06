@@ -60,6 +60,7 @@ private:
     void update_custom_hosts(QString);
     void update_dmr_ids();
     void update_nxdn_ids();
+    QMap<QString, QString> discover_serial_devices(void);
 
     Ui::MainWindow *ui;
     Digihamlib *digihamlib;
