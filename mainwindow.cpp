@@ -28,12 +28,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     digihamlib = new Digihamlib();
 
     m_settings_processed = false;
-    m_modelchange = false;
-    m_settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "kd0oss", "Digihamlib", this);
+    m_mdirect = false;
+    m_settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "kd0oss", "HAMster", this);
     config_path = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_WIN)
     config_path += "/kd0oss";
-    qDebug() << "Config path:" << config_path;
+    updateLog(QString("Config path: %1").arg(config_path));
 #endif
 #if defined(Q_OS_ANDROID)
     keepScreenOn();
@@ -47,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     connect(ui->connectButton, SIGNAL(released()), this, SLOT(do_connect()));
     connect(digihamlib, SIGNAL(update_log(QString)), this, SLOT(updateLog(QString)));
-    connect(digihamlib, SIGNAL(send_audio(int16_t*,int)), this, SLOT(process_audio(int16_t*,int)));
+    connect(digihamlib, SIGNAL(audio_ready()), this, SLOT(process_audio()));
     connect(digihamlib, SIGNAL(update_data()), this, SLOT(update_status()));
     connect(audioinput, SIGNAL(mic_send_audio(QQueue<qint16>*)), this, SLOT(micSendAudio(QQueue<qint16>*)));
     connect(ui->micGainSlider, SIGNAL(valueChanged(int)), this, SLOT(setMicGain(int)));
@@ -56,10 +56,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->moduleCombo, SIGNAL(currentTextChanged(QString)), digihamlib, SLOT(set_module(QString)));
     connect(ui->m17CanCombo, SIGNAL(currentTextChanged(QString)), digihamlib, SLOT(set_modemM17CAN(QString)));
     connect(ui->reflectorCombo, SIGNAL(currentTextChanged(QString)), digihamlib, SLOT(set_reflector(QString)));
-    connect(ui->tgidEdit, SIGNAL(currentTextChanged(QString)), digihamlib, SLOT(set_dmrtgid(QString)));
+    connect(ui->tgidEdit, SIGNAL(textChanged(QString)), digihamlib, SLOT(set_dmrtgid(QString)));
     connect(ui->colorCodeCombo, SIGNAL(currentIndexChanged(int)), digihamlib, SLOT(set_cc(int)));
     connect(ui->slotCombo, SIGNAL(currentIndexChanged(int)), digihamlib, SLOT(set_slot(int)));
-    connect(ui->audioOutCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(audioDeviceChanged(int)));
     connect(ui->audioInCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(micDeviceChanged(int)));
     connect(ui->vocoderCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(vocoderChanged(int)));
     connect(ui->modemCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(modemChanged(int)));
@@ -71,6 +70,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow()
 {
+    delete digihamlib;
     delete ui;
 }
 
@@ -78,7 +78,7 @@ void MainWindow::save_settings()
 {
     //m_settings->setValue("PLAYBACK", ui->comboPlayback->currentText());
     //m_settings->setValue("CAPTURE", ui->comboCapture->currentText());
-    m_settings->setValue("IPV6", m_ipv6 ? "true" : "false");
+    m_settings->setValue("IPV6", digihamlib->get_ipv6());
     m_settings->setValue("MODE", digihamlib->get_mode());
     m_settings->setValue("HOST", digihamlib->get_reflector());
     m_settings->setValue("MODULE", digihamlib->get_module());
@@ -257,12 +257,12 @@ void MainWindow::download_file(QString f, bool u)
 
 void MainWindow::url_downloaded(QString url)
 {
-    emit updateLog("Downloaded " + url);
+    updateLog("Downloaded " + url);
 }
 
 void MainWindow::file_downloaded(QString filename)
 {
-    emit updateLog("Updated " + filename);
+    updateLog("Updated " + filename);
     {
         if (filename == "dplus.txt" && m_protocol == "REF"){
             process_dstar_hosts(m_protocol);
@@ -308,8 +308,8 @@ void MainWindow::update_custom_hosts(QString h)
 
 void MainWindow::process_dstar_hosts(QString m)
 {
-    m_hostmap.clear();
-    m_hostsmodel.clear();
+    digihamlib->m_hostmap.clear();
+    digihamlib->m_hostsmodel.clear();
     QString filename, port;
     if (m == "REF"){
         filename = "dplus.txt";
@@ -336,22 +336,22 @@ void MainWindow::process_dstar_hosts(QString m)
                 }
                 QStringList ll = l.split('\t');
                 if (ll.size() > 1){
-                    m_hostmap[ll.at(0).simplified()] = ll.at(1).simplified() + "," + port;
+                    digihamlib->m_hostmap[ll.at(0).simplified()] = ll.at(1).simplified() + "," + port;
                 }
             }
 
-            m_customhosts = m_localhosts.split('\n');
-            for (const auto& i : std::as_const(m_customhosts)){
+            digihamlib->m_customhosts = m_localhosts.split('\n');
+            for (const auto& i : std::as_const(digihamlib->m_customhosts)){
                 QStringList line = i.simplified().split(' ');
 
                 if (line.at(0) == m){
-                    m_hostmap[line.at(1).simplified()] = line.at(2).simplified() + "," + line.at(3).simplified();
+                    digihamlib->m_hostmap[line.at(1).simplified()] = line.at(2).simplified() + "," + line.at(3).simplified();
                 }
             }
 
-            QMap<QString, QString>::const_iterator i = m_hostmap.constBegin();
-            while (i != m_hostmap.constEnd()) {
-                m_hostsmodel.append(i.key());
+            QMap<QString, QString>::const_iterator i = digihamlib->m_hostmap.constBegin();
+            while (i != digihamlib->m_hostmap.constEnd()) {
+                digihamlib->m_hostsmodel.append(i.key());
                 ++i;
             }
         }
@@ -361,8 +361,8 @@ void MainWindow::process_dstar_hosts(QString m)
 
 void MainWindow::process_ysf_hosts()
 {
-    m_hostmap.clear();
-    m_hostsmodel.clear();
+    digihamlib->m_hostmap.clear();
+    digihamlib->m_hostsmodel.clear();
     QFileInfo check_file(config_path + "/YSFHosts.txt");
     if (check_file.exists() && check_file.isFile()){
         QFile f(config_path + "/YSFHosts.txt");
@@ -374,22 +374,22 @@ void MainWindow::process_ysf_hosts()
                 }
                 QStringList ll = l.split(';');
                 if (ll.size() > 4){
-                    m_hostmap[ll.at(1).simplified()] = ll.at(3) + "," + ll.at(4);
+                    digihamlib->m_hostmap[ll.at(1).simplified()] = ll.at(3) + "," + ll.at(4);
                 }
             }
 
-            m_customhosts = m_localhosts.split('\n');
-            for (const auto& i : std::as_const(m_customhosts)){
+            digihamlib->m_customhosts = digihamlib->m_localhosts.split('\n');
+            for (const auto& i : std::as_const(digihamlib->m_customhosts)){
                 QStringList line = i.simplified().split(' ');
 
                 if (line.at(0) == "YSF"){
-                    m_hostmap[line.at(1).simplified()] = line.at(2).simplified() + "," + line.at(3).simplified();
+                    digihamlib->m_hostmap[line.at(1).simplified()] = line.at(2).simplified() + "," + line.at(3).simplified();
                 }
             }
 
-            QMap<QString, QString>::const_iterator i = m_hostmap.constBegin();
-            while (i != m_hostmap.constEnd()) {
-                m_hostsmodel.append(i.key());
+            QMap<QString, QString>::const_iterator i = digihamlib->m_hostmap.constBegin();
+            while (i != digihamlib->m_hostmap.constEnd()) {
+                digihamlib->m_hostsmodel.append(i.key());
                 ++i;
             }
         }
@@ -399,8 +399,8 @@ void MainWindow::process_ysf_hosts()
 
 void MainWindow::process_fcs_rooms()
 {
-    m_hostmap.clear();
-    m_hostsmodel.clear();
+    digihamlib->m_hostmap.clear();
+    digihamlib->m_hostsmodel.clear();
     QFileInfo check_file(config_path + "/FCSHosts.txt");
     if (check_file.exists() && check_file.isFile()){
         QFile f(config_path + "/FCSHosts.txt");
@@ -413,23 +413,23 @@ void MainWindow::process_fcs_rooms()
                 QStringList ll = l.split(';');
                 if (ll.size() > 4){
                     if (ll.at(1).simplified() != "nn"){
-                        m_hostmap[ll.at(0).simplified() + " - " + ll.at(1).simplified()] = ll.at(2).left(6).toLower() + ".xreflector.net,62500";
+                        digihamlib->m_hostmap[ll.at(0).simplified() + " - " + ll.at(1).simplified()] = ll.at(2).left(6).toLower() + ".xreflector.net,62500";
                     }
                 }
             }
 
-            m_customhosts = m_localhosts.split('\n');
-            for (const auto& i : std::as_const(m_customhosts)){
+            digihamlib->m_customhosts = digihamlib->m_localhosts.split('\n');
+            for (const auto& i : std::as_const(digihamlib->m_customhosts)){
                 QStringList line = i.simplified().split(' ');
 
                 if (line.at(0) == "FCS"){
-                    m_hostmap[line.at(1).simplified()] = line.at(2).simplified() + "," + line.at(3).simplified();
+                    digihamlib->m_hostmap[line.at(1).simplified()] = line.at(2).simplified() + "," + line.at(3).simplified();
                 }
             }
 
-            QMap<QString, QString>::const_iterator i = m_hostmap.constBegin();
-            while (i != m_hostmap.constEnd()) {
-                m_hostsmodel.append(i.key());
+            QMap<QString, QString>::const_iterator i = digihamlib->m_hostmap.constBegin();
+            while (i != digihamlib->m_hostmap.constEnd()) {
+                digihamlib->m_hostsmodel.append(i.key());
                 ++i;
             }
         }
@@ -439,8 +439,8 @@ void MainWindow::process_fcs_rooms()
 
 void MainWindow::process_dmr_hosts()
 {
-    m_hostmap.clear();
-    m_hostsmodel.clear();
+    digihamlib->m_hostmap.clear();
+    digihamlib->m_hostsmodel.clear();
     QFileInfo check_file(config_path + "/DMRHosts.txt");
     if (check_file.exists() && check_file.isFile()){
         QFile f(config_path + "/DMRHosts.txt");
@@ -456,23 +456,23 @@ void MainWindow::process_dmr_hosts()
                         && (ll.at(0).simplified() != "DMR2YSF")
                         && (ll.at(0).simplified() != "DMR2NXDN"))
                     {
-                        m_hostmap[ll.at(0).simplified()] = ll.at(2) + "," + ll.at(4) + "," + ll.at(3);
+                        digihamlib->m_hostmap[ll.at(0).simplified()] = ll.at(2) + "," + ll.at(4) + "," + ll.at(3);
                     }
                 }
             }
 
-            m_customhosts = m_localhosts.split('\n');
-            for (const auto& i : std::as_const(m_customhosts)){
+            digihamlib->m_customhosts = digihamlib->m_localhosts.split('\n');
+            for (const auto& i : std::as_const(digihamlib->m_customhosts)){
                 QStringList line = i.simplified().split(' ');
 
                 if (line.at(0) == "DMR"){
-                    m_hostmap[line.at(1).simplified()] = line.at(2).simplified() + "," + line.at(3).simplified() + "," + line.at(4).simplified();
+                    digihamlib->m_hostmap[line.at(1).simplified()] = line.at(2).simplified() + "," + line.at(3).simplified() + "," + line.at(4).simplified();
                 }
             }
 
-            QMap<QString, QString>::const_iterator i = m_hostmap.constBegin();
-            while (i != m_hostmap.constEnd()) {
-                m_hostsmodel.append(i.key());
+            QMap<QString, QString>::const_iterator i = digihamlib->m_hostmap.constBegin();
+            while (i != digihamlib->m_hostmap.constEnd()) {
+                digihamlib->m_hostsmodel.append(i.key());
                 ++i;
             }
         }
@@ -482,8 +482,8 @@ void MainWindow::process_dmr_hosts()
 
 void MainWindow::process_p25_hosts()
 {
-    m_hostmap.clear();
-    m_hostsmodel.clear();
+    digihamlib->m_hostmap.clear();
+    digihamlib->m_hostsmodel.clear();
     QFileInfo check_file(config_path + "/P25Hosts.txt");
     if (check_file.exists() && check_file.isFile()){
         QFile f(config_path + "/P25Hosts.txt");
@@ -495,27 +495,27 @@ void MainWindow::process_p25_hosts()
                 }
                 QStringList ll = l.simplified().split(' ');
                 if (ll.size() > 2){
-                    m_hostmap[ll.at(0).simplified()] = ll.at(1) + "," + ll.at(2);
+                    digihamlib->m_hostmap[ll.at(0).simplified()] = ll.at(1) + "," + ll.at(2);
                 }
             }
 
-            m_customhosts = m_localhosts.split('\n');
-            for (const auto& i : std::as_const(m_customhosts)){
+            digihamlib->m_customhosts = digihamlib->m_localhosts.split('\n');
+            for (const auto& i : std::as_const(digihamlib->m_customhosts)){
                 QStringList line = i.simplified().split(' ');
 
                 if (line.at(0) == "P25"){
-                    m_hostmap[line.at(1).simplified()] = line.at(2).simplified() + "," + line.at(3).simplified();
+                    digihamlib->m_hostmap[line.at(1).simplified()] = line.at(2).simplified() + "," + line.at(3).simplified();
                 }
             }
 
-            QMap<QString, QString>::const_iterator i = m_hostmap.constBegin();
-            while (i != m_hostmap.constEnd()) {
-                m_hostsmodel.append(i.key());
+            QMap<QString, QString>::const_iterator i = digihamlib->m_hostmap.constBegin();
+            while (i != digihamlib->m_hostmap.constEnd()) {
+                digihamlib->m_hostsmodel.append(i.key());
                 ++i;
             }
             QMap<int, QString> m;
-            for (auto s : m_hostsmodel) m[s.toInt()] = s;
-            m_hostsmodel = QStringList(m.values());
+            for (auto s : digihamlib->m_hostsmodel) m[s.toInt()] = s;
+            digihamlib->m_hostsmodel = QStringList(m.values());
         }
         f.close();
     }
@@ -523,8 +523,8 @@ void MainWindow::process_p25_hosts()
 
 void MainWindow::process_nxdn_hosts()
 {
-    m_hostmap.clear();
-    m_hostsmodel.clear();
+    digihamlib->m_hostmap.clear();
+    digihamlib->m_hostsmodel.clear();
 
     QFileInfo check_file(config_path + "/NXDNHosts.txt");
     if (check_file.exists() && check_file.isFile()){
@@ -537,27 +537,27 @@ void MainWindow::process_nxdn_hosts()
                 }
                 QStringList ll = l.simplified().split(' ');
                 if (ll.size() > 2){
-                    m_hostmap[ll.at(0).simplified()] = ll.at(1) + "," + ll.at(2);
+                    digihamlib->m_hostmap[ll.at(0).simplified()] = ll.at(1) + "," + ll.at(2);
                 }
             }
 
-            m_customhosts = m_localhosts.split('\n');
-            for (const auto& i : std::as_const(m_customhosts)){
+            digihamlib->m_customhosts = digihamlib->m_localhosts.split('\n');
+            for (const auto& i : std::as_const(digihamlib->m_customhosts)){
                 QStringList line = i.simplified().split(' ');
 
                 if (line.at(0) == "NXDN"){
-                    m_hostmap[line.at(1).simplified()] = line.at(2).simplified() + "," + line.at(3).simplified();
+                    digihamlib->m_hostmap[line.at(1).simplified()] = line.at(2).simplified() + "," + line.at(3).simplified();
                 }
             }
 
-            QMap<QString, QString>::const_iterator i = m_hostmap.constBegin();
-            while (i != m_hostmap.constEnd()) {
-                m_hostsmodel.append(i.key());
+            QMap<QString, QString>::const_iterator i = digihamlib->m_hostmap.constBegin();
+            while (i != digihamlib->m_hostmap.constEnd()) {
+                digihamlib->m_hostsmodel.append(i.key());
                 ++i;
             }
             QMap<int, QString> m;
-            for (auto s : m_hostsmodel) m[s.toInt()] = s;
-            m_hostsmodel = QStringList(m.values());
+            for (auto s : digihamlib->m_hostsmodel) m[s.toInt()] = s;
+            digihamlib->m_hostsmodel = QStringList(m.values());
         }
         f.close();
     }
@@ -565,8 +565,8 @@ void MainWindow::process_nxdn_hosts()
 
 void MainWindow::process_m17_hosts()
 {
-    m_hostmap.clear();
-    m_hostsmodel.clear();
+    digihamlib->m_hostmap.clear();
+    digihamlib->m_hostsmodel.clear();
 
     QFileInfo check_file(config_path + "/M17Hosts-full.csv");
     if (check_file.exists() && check_file.isFile())
@@ -588,7 +588,7 @@ void MainWindow::process_m17_hosts()
                 }
             }
 
-            digihamlib->m_customhosts = m_localhosts.split('\n');
+            digihamlib->m_customhosts = digihamlib->m_localhosts.split('\n');
             for (const auto& i : std::as_const(digihamlib->m_customhosts))
             {
                 QStringList line = i.simplified().split(' ');
@@ -631,7 +631,7 @@ void MainWindow::process_dmr_ids()
                 QStringList llids = lids.simplified().split(' ');
 
                 if (llids.size() >= 2){
-                    m_dmrids[llids.at(0).toUInt()] = llids.at(1);
+                    digihamlib->m_dmrids[llids.at(0).toUInt()] = llids.at(1);
                 }
             }
         }
@@ -664,7 +664,7 @@ void MainWindow::process_nxdn_ids()
                 QStringList llids = lids.simplified().split(',');
 
                 if (llids.size() > 1){
-                    m_nxdnids[llids.at(0).toUInt()] = llids.at(1);
+                    digihamlib->m_nxdnids[llids.at(0).toUInt()] = llids.at(1);
                 }
             }
         }
@@ -761,6 +761,8 @@ void MainWindow::check_host_files()
 
 void MainWindow::process_mode_change(QString m)
 {
+    m_protocol = m;
+    digihamlib->set_protocol(m);
     ui->tgidEdit->setVisible(false);
     ui->tgidLabel->setVisible(false);
     ui->m17CanLabel->setVisible(false);
@@ -842,7 +844,8 @@ void MainWindow::discover_devices()
     digihamlib->m_modems.append("None");
     ui->modemCombo->addItem("None");
 #if !defined(Q_OS_IOS)
-    QMap<QString, QString> l = SerialAMBE::discover_devices();
+    digihamlib->m_ambedev = new SerialAMBE("M17");
+    QMap<QString, QString> l = digihamlib->m_ambedev->discover_devices();//SerialAMBE::discover_devices();
     QMap<QString, QString>::const_iterator i = l.constBegin();
 
     while (i != l.constEnd())
@@ -853,12 +856,13 @@ void MainWindow::discover_devices()
         ui->modemCombo->addItem(i.value());
         ++i;
     }
- //   emit update_devices();
+    delete digihamlib->m_ambedev;
 #endif
 }
 
 void MainWindow::do_connect(void)
 {
+    save_settings();
     digihamlib->set_debug(ui->debugCB->isChecked());
 
     if (ui->connectButton->text() != "Disconnect")
@@ -895,9 +899,18 @@ void MainWindow::updateLog(QString status)
     ui->volumeLevelBar->setValue(0);
 }
 
-void MainWindow::process_audio(int16_t *data, int len)
+void MainWindow::process_audio()
 {
-    audio->process_audio(data, len);
+    int16_t *pcm = NULL;
+    int      len = digihamlib->m_rxaudioq.size();
+
+    pcm = (int16_t*)malloc(sizeof(int16_t) * len);
+    for (int i=0; i<len; i++)
+    {
+        pcm[i] = digihamlib->m_rxaudioq.dequeue();
+    }
+    audio->process_audio(pcm, len);
+    free(pcm);
     int level = ((float)audio->maxlevel / 32767) * 100;
     if (!isTx)
         ui->volumeLevelBar->setValue(level);
@@ -950,22 +963,10 @@ void MainWindow::stop_tx(void)
     ui->volumeLevelBar->setValue(0);
 }
 
-void MainWindow::audioDeviceChanged(QAudioDevice info,int rate,int channels)
-{
-    audio->select_audio(info, rate, channels);
-} // end audioDeviceChanged
-
-
 void MainWindow::micDeviceChanged(QAudioDevice info,int rate,int channels)
 {
     audioinput->select_audio(info, rate, channels);
 } // end micDeviceChanged
-
-
-void MainWindow::audioDeviceChanged(int selection)
-{
-    audioDeviceChanged(ui->audioOutCombo->itemData(selection).value<QAudioDevice>(), 8000, 1);
-}
 
 
 void MainWindow::micDeviceChanged(int selection)

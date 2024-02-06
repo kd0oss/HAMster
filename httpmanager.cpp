@@ -24,7 +24,7 @@ HttpManager::HttpManager(QString f, bool u) : QObject(nullptr)
 	m_config_path = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
 	m_url = u;
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_WIN)
-	m_config_path += "/dudetronics";
+    m_config_path += "/HAMster";
 #endif
 	m_filename = f;
 }

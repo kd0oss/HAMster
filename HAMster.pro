@@ -11,7 +11,6 @@ CONFIG += c++17
 SOURCES += \
     Audio.cpp \
     Audioinput.cpp \
-    G711A.cpp \
     httpmanager.cpp \
     main.cpp \
     mainwindow.cpp
@@ -19,7 +18,6 @@ SOURCES += \
 HEADERS += \
     Audio.h \
     Audioinput.h \
-    G711A.h \
     cusdr_queue.h \
     httpmanager.h \
     mainwindow.h

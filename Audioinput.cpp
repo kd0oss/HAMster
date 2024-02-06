@@ -74,7 +74,7 @@ void AudioInput::get_audioinput_devices(QComboBox* comboBox)
     m_format.setSampleFormat(QAudioFormat::Int16);
     if (!m_device.isFormatSupported(m_format))
     {
-        qDebug()<<"**************** Audio format not supported by Mic input device.";
+        qDebug() << "**************** Audio format not supported by Mic input device.";
     }
 
     m_audioInput = new QAudioSource(m_device, m_format, this);

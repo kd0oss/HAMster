@@ -46,14 +46,12 @@
 #include <QMutex>
 //#include <samplerate.h>
 #include <QThread>
-#include "G711A.h"
 #include "cusdr_queue.h"
 
 #define AUDIO_BUFFER_SIZE 800
 #define AUDIO_OUTPUT_BUFFER_SIZE (1024*2)
 #define RESAMPLING_BUFFER_SIZE (32000*2)    // 2 channels
 
-#define BIGENDIAN
 // There are problems running at 8000 samples per second on Mac OS X
 // The resolution is to run at 8011 samples persecond.
 //
@@ -78,44 +76,13 @@ public:
     qint64 writeData(const char *data, qint64 len);
 public slots:
     void set_decoded_buffer(QHQueue<qint16>* pBuffer);
-    void set_audio_encoding(int encoding);
 private:
     quint32 recv_ts;
     QHQueue <qint16> * pdecoded_buffer;
-    int audio_encoding;
-    G711A g711a;
     QHQueue<qint16> queue;
 signals:
     void audio_level(int16_t*);
 };
-
-class Audio_processing : public QObject {
-    Q_OBJECT
-public:
-    Audio_processing();
-    ~Audio_processing();
-public slots:
-    void process_audio(int16_t* buffer, int length);
-    void set_queue(QHQueue<qint16> *buffer);
-//    void set_audio_channels(int c);
-    void set_audio_encoding(int enc);
-private:
-    void aLawDecode(char* buffer,int length);
-    void pcmDecode(int16_t* buffer,int length);
-    void resample(int no_of_samples);
-    void init_decodetable();
-    float buffer_in[RESAMPLING_BUFFER_SIZE];
-    float buffer_out[RESAMPLING_BUFFER_SIZE];
-    short decodetable[256];
- //   SRC_STATE *src_state;
-    double src_ratio;
- //   SRC_DATA sr_data;
-    QHQueue<qint16> queue;
-    QHQueue<qint16> *pdecoded_buffer;
-    int audio_channels;
-    int audio_encoding;
-};
-
 
 class Audio : public QObject {
     Q_OBJECT
@@ -124,20 +91,16 @@ public:
     ~Audio();
 
     int16_t maxlevel;
-    int get_audio_encoding();
     QHQueue <qint16> decoded_buffer;
-    int audio_encoding;
     QMediaDevices *m_devices = nullptr;
 signals:
     void audio_processing_process_audio(int16_t* buffer,int length);
 public slots:
     void updateAudioDevices(QComboBox *comboBox);
     void deviceChanged(int index);
-    void select_audio(QAudioDevice info,int rate,int channels);
     void process_audio(int16_t* buffer,int length);
     void clear_decoded_buffer(void);
     void get_audio_device(QAudioDevice * device);
-    void set_audio_encoding(int enc);
     void set_volume(qreal);
 private:
     void             initializeAudio(const QAudioDevice &deviceInfo);
@@ -147,16 +110,16 @@ private:
     QScopedPointer<QAudioOutput>     m_audioOutput;
     QAudioOutput     *audio_output;
 #else
-    QScopedPointer<QAudioSink>     m_audioOutput;
-    QAudioSink     *audio_output;
+    QScopedPointer<QAudioSink>   m_audioOutput;
+    QAudioSink                  *audio_output;
 #endif
+
     bool             connected;
     QThread*         audio_output_thread;
     QAudioDevice     audio_device;
     Audio_playback   *audio_out;
     int              sampleRate;
     int              audio_channels;
-    Audio_processing *audio_processing;
     QThread          *audio_processing_thread;
     QComboBox        *devList;
 };

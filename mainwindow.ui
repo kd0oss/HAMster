@@ -25,6 +25,9 @@
   <property name="windowTitle">
    <string>HAMster</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">color: rgb(77, 77, 77);</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
@@ -42,7 +45,8 @@
        </size>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color: rgb(56, 56, 56);</string>
+       <string notr="true">background-color: rgb(56, 56, 56);
+color: rgb(255, 255, 255);</string>
       </property>
       <property name="currentIndex">
        <number>0</number>
@@ -90,6 +94,11 @@
            </property>
            <item>
             <widget class="QLabel" name="label_48">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
              <property name="text">
               <string>Mode:</string>
              </property>
@@ -158,6 +167,11 @@
            </item>
            <item>
             <widget class="QLabel" name="reflectorLabel">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
              <property name="text">
               <string>Reflector:</string>
              </property>
@@ -242,6 +256,11 @@
                <height>17</height>
               </size>
              </property>
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
              <property name="text">
               <string>M17 CAN:</string>
              </property>
@@ -314,6 +333,11 @@
                <height>17</height>
               </size>
              </property>
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
              <property name="text">
               <string>TGID:</string>
              </property>
@@ -348,6 +372,11 @@
                <width>59</width>
                <height>0</height>
               </size>
+             </property>
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
              </property>
              <property name="text">
               <string>Module:</string>
@@ -514,6 +543,11 @@
                <height>0</height>
               </size>
              </property>
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
              <property name="text">
               <string>Slot:</string>
              </property>
@@ -555,6 +589,11 @@
                <width>31</width>
                <height>0</height>
               </size>
+             </property>
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
              </property>
              <property name="text">
               <string>CC:</string>
@@ -1039,7 +1078,8 @@ color: rgb(0, 0, 0);</string>
            </font>
           </property>
           <property name="styleSheet">
-           <string notr="true">selection-color: rgb(170, 0, 0);</string>
+           <string notr="true">selection-color: rgb(170, 0, 0);
+color: rgb(255, 255, 255);</string>
           </property>
           <property name="text">
            <string>TX</string>
@@ -1580,6 +1620,9 @@ color: rgb(255, 255, 255);</string>
                  <bold>true</bold>
                 </font>
                </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 255, 255);</string>
+               </property>
                <property name="text">
                 <string>Callsign:</string>
                </property>
@@ -1661,7 +1704,11 @@ color: rgb(255, 255, 255);</string>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="urlEdit"/>
+              <widget class="QLineEdit" name="urlEdit">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 255, 127);</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -1687,6 +1734,14 @@ color: rgb(255, 255, 255);</string>
             <layout class="QVBoxLayout" name="verticalLayout_6">
              <item>
               <widget class="QLabel" name="label_13">
+               <property name="font">
+                <font>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 255, 255);</string>
+               </property>
                <property name="text">
                 <string>Audio Out:</string>
                </property>
@@ -1697,6 +1752,11 @@ color: rgb(255, 255, 255);</string>
              </item>
              <item>
               <widget class="QLabel" name="label_14">
+               <property name="font">
+                <font>
+                 <bold>true</bold>
+                </font>
+               </property>
                <property name="text">
                 <string>Audio In:</string>
                </property>
@@ -1707,13 +1767,22 @@ color: rgb(255, 255, 255);</string>
              </item>
              <item>
               <widget class="QLabel" name="label_15">
+               <property name="font">
+                <font>
+                 <bold>true</bold>
+                </font>
+               </property>
                <property name="text">
                 <string>Vocoder:</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="vocoderCombo"/>
+              <widget class="QComboBox" name="vocoderCombo">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 255, 255);</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -1783,6 +1852,9 @@ color: rgb(0, 190, 139);</string>
                   <font>
                    <bold>true</bold>
                   </font>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);</string>
                  </property>
                  <property name="text">
                   <string>Package ID:</string>
@@ -1874,6 +1946,11 @@ color: rgb(255, 170, 127);</string>
               <layout class="QHBoxLayout" name="horizontalLayout_6">
                <item>
                 <widget class="QLabel" name="label_16">
+                 <property name="font">
+                  <font>
+                   <bold>true</bold>
+                  </font>
+                 </property>
                  <property name="text">
                   <string>Modem:</string>
                  </property>
@@ -1894,6 +1971,11 @@ color: rgb(255, 170, 127);</string>
                </item>
                <item>
                 <widget class="QLabel" name="label_31">
+                 <property name="font">
+                  <font>
+                   <bold>true</bold>
+                  </font>
+                 </property>
                  <property name="text">
                   <string>Baud:</string>
                  </property>
@@ -1906,6 +1988,9 @@ color: rgb(255, 170, 127);</string>
                    <width>71</width>
                    <height>0</height>
                   </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);</string>
                  </property>
                  <item>
                   <property name="text">
@@ -1922,7 +2007,11 @@ color: rgb(255, 170, 127);</string>
               </layout>
              </item>
              <item>
-              <widget class="QComboBox" name="modemCombo"/>
+              <widget class="QComboBox" name="modemCombo">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 255, 255);</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -1961,6 +2050,11 @@ color: rgb(255, 170, 127);</string>
            <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0,0,0,0">
             <item row="0" column="0">
              <widget class="QLabel" name="label_33">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>RX Freq</string>
               </property>
@@ -1968,6 +2062,11 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="3" column="3">
              <widget class="QLabel" name="label_43">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>TX DC Offset</string>
               </property>
@@ -1978,6 +2077,11 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="4" column="3">
              <widget class="QLabel" name="label_44">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>TX Delay</string>
               </property>
@@ -1985,6 +2089,11 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_34">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>RX Offset</string>
               </property>
@@ -1995,6 +2104,11 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="6" column="0">
              <widget class="QLabel" name="label_40">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>DMRTXLevel</string>
               </property>
@@ -2002,6 +2116,11 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="1" column="3">
              <widget class="QLabel" name="label_35">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>TX Offset</string>
               </property>
@@ -2009,6 +2128,11 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="5" column="0">
              <widget class="QLabel" name="label_39">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>CWIdTXLevel</string>
               </property>
@@ -2035,6 +2159,11 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="6" column="3">
              <widget class="QLabel" name="label_46">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>YSFTXLevel</string>
               </property>
@@ -2042,6 +2171,11 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="2" column="0">
              <widget class="QLabel" name="label_36">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>RX Level</string>
               </property>
@@ -2077,6 +2211,11 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="0" column="3">
              <widget class="QLabel" name="label_32">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>TX Freq</string>
               </property>
@@ -2087,6 +2226,11 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="3" column="0">
              <widget class="QLabel" name="label_37">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>RX DC Offset</string>
               </property>
@@ -2094,6 +2238,11 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="7" column="0">
              <widget class="QLabel" name="label_41">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>P25TXLevel</string>
               </property>
@@ -2104,6 +2253,11 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="7" column="3">
              <widget class="QLabel" name="label_47">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>NXDNTXLevel</string>
               </property>
@@ -2111,6 +2265,11 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="4" column="0">
              <widget class="QLabel" name="label_38">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>RF Level</string>
               </property>
@@ -2118,6 +2277,11 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="2" column="3">
              <widget class="QLabel" name="label_42">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>TX Level</string>
               </property>
@@ -2128,6 +2292,11 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="5" column="3">
              <widget class="QLabel" name="label_45">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>DStarTXLevel</string>
               </property>
@@ -2135,6 +2304,14 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="8" column="5">
              <widget class="QCheckBox" name="pttInvertCB">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(255, 255, 255);</string>
+              </property>
               <property name="text">
                <string>PTT Invert</string>
               </property>
@@ -2142,6 +2319,11 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="8" column="0">
              <widget class="QCheckBox" name="rxInvertCB">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>RX Invert</string>
               </property>
@@ -2149,6 +2331,11 @@ color: rgb(255, 170, 127);</string>
             </item>
             <item row="8" column="2">
              <widget class="QCheckBox" name="txInvertCB">
+              <property name="font">
+               <font>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>TX Invert</string>
               </property>
@@ -2192,7 +2379,11 @@ color: rgb(255, 170, 127);</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
-         <widget class="QListWidget" name="processLogList"/>
+         <widget class="QListWidget" name="processLogList">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(255, 255, 255);</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
