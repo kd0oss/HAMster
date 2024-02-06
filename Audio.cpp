@@ -151,6 +151,7 @@ void Audio::deviceChanged(int index)
     m_audioOutput->stop();
     m_audioOutput->disconnect(this);
     initializeAudio(devList->itemData(index).value<QAudioDevice>());
+    m_audioOutput->start(m_audioPlayback.data());
 }
 
 void Audio::updateAudioDevices(QComboBox *comboBox)
@@ -173,7 +174,7 @@ void Audio::updateAudioDevices(QComboBox *comboBox)
                 comboBox->addItem(deviceInfo.description(), QVariant::fromValue(deviceInfo));
         }
         connect(comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(deviceChanged(int)));
-        connect(m_devices, SIGNAL(audioOutputsChanged()), this, SLOT(updateAudioDevices(comboBox)));
+   //     connect(m_devices, SIGNAL(audioOutputsChanged()), this, SLOT(updateAudioDevices(comboBox)));
     }
 }
 
