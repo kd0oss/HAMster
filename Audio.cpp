@@ -123,7 +123,6 @@ void Audio::initializeAudio(const QAudioDevice &deviceInfo)
     m_audioPlayback->set_decoded_buffer(&decoded_buffer);
     m_audioOutput.reset(new QAudioSink(deviceInfo, format));
     m_audioOutput->setBufferSize(1280);
-    m_audioPlayback->set_decoded_buffer(&decoded_buffer);
     m_audioPlayback->start();
 }
 

@@ -58,7 +58,7 @@ void HttpManager::http_finished(QNetworkReply *reply)
 			QStringList l = m_filename.split('/');
 			m_filename = "/" + l.at(l.size() - 1);
 		}
-        //qDebug() << "m_config_path + m_filename = " << m_config_path + m_filename;
+        qDebug() << "m_config_path + m_filename = " << m_config_path + m_filename;
         QStringList l = m_filename.split('_');
         if((l.at(0) != "/vocoder") && (l.size() > 1)) return;
 		QFile *hosts_file = new QFile(m_config_path + m_filename);

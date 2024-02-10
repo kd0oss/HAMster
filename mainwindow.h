@@ -5,8 +5,9 @@
 #include <QObject>
 #include <QDebug>
 #include <QTimer>
-#include "Audio.h"
-#include "Audioinput.h"
+//#include "Audio.h"
+//#include "Audioinput.h"
+#include "audioengine.h"
 #include "../digihamlib/digihamlib.h"
 
 QT_BEGIN_NAMESPACE
@@ -31,7 +32,6 @@ private slots:
     void updateLog(QString);
     void process_audio(void);
     void update_status(void);
-    void micSendAudio(QQueue<qint16>* queue);
     void updateMicLevel(qreal);
     void start_tx(void);
     void stop_tx(void);
@@ -51,6 +51,7 @@ private slots:
     void micDeviceChanged(QAudioDevice info,int rate,int channels);
     void vocoderChanged(int);
     void modemChanged(int);
+    void send_mic_audio(void);
 
 private:
     void save_settings();
@@ -64,8 +65,9 @@ private:
 
     Ui::MainWindow *ui;
     Digihamlib *digihamlib;
-    Audio* audio;
-    AudioInput* audioinput;
+ //   Audio* audio;
+ //   AudioInput* audioinput;
+    AudioEngine *m_audio;
     QAudioDevice audio_device;
     QString m_audioin;
     QString m_audioout;
@@ -84,6 +86,7 @@ private:
     QStringList m_vocoders;
     QStringList m_modems;
     QString m_localhosts;
+    QTimer *txtimer;
 
     bool isTx;
 };

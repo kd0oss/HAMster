@@ -10,11 +10,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 {
     ui->setupUi(this);
 
-    audio = new Audio();
-    audio->updateAudioDevices(ui->audioOutCombo);
-    audioinput = new AudioInput();
-    audioinput->get_audioinput_devices(ui->audioInCombo);
+    m_audio = new AudioEngine(m_audioin, m_audioout);
+    m_audio->init();
+    m_audio->start_playback();
+    m_audio->set_input_volume(0.70);
     isTx = false;
+    txtimer = new QTimer();
+    connect(txtimer, SIGNAL(timeout()), this, SLOT(send_mic_audio()));
 
     ui->connectButton->setEnabled(true);
     ui->tgidEdit->setVisible(false);
@@ -35,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     m_settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "kd0oss", "HAMster", this);
     config_path = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_WIN)
-    config_path += "/kd0oss";
+    config_path += "/HAMster";
     updateLog(QString("Config path: %1").arg(config_path));
 #endif
 #if defined(Q_OS_ANDROID)
@@ -52,7 +54,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(digihamlib, SIGNAL(update_log(QString)), this, SLOT(updateLog(QString)));
     connect(digihamlib, SIGNAL(audio_ready()), this, SLOT(process_audio()));
     connect(digihamlib, SIGNAL(update_data()), this, SLOT(update_status()));
-    connect(audioinput, SIGNAL(mic_send_audio(QQueue<qint16>*)), this, SLOT(micSendAudio(QQueue<qint16>*)));
     connect(ui->micGainSlider, SIGNAL(valueChanged(int)), this, SLOT(setMicGain(int)));
     connect(ui->modeCombo, SIGNAL(currentTextChanged(QString)), this, SLOT(process_mode_change(QString)));
     connect(ui->debugCB, SIGNAL(clicked(bool)), digihamlib, SLOT(set_debug(bool)));
@@ -67,12 +68,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->modemCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(modemChanged(int)));
 
     discover_devices();
-    audioinput->setMicGain(90);
     ui->micGainSlider->setValue(90);
 }
 
 MainWindow::~MainWindow()
 {
+    m_audio->stop_playback();
+    delete m_audio;
     delete digihamlib;
     delete ui;
 }
@@ -764,6 +766,7 @@ void MainWindow::check_host_files()
 
 void MainWindow::process_mode_change(QString m)
 {
+    digihamlib->set_mode(m);
     if (m.contains(" "))
         m_protocol = m.split(" ").at(1);
     else
@@ -841,6 +844,19 @@ void MainWindow::process_mode_change(QString m)
 
 void MainWindow::discover_devices()
 {
+    QStringList m_playbacks;
+    QStringList m_captures;
+
+    m_playbacks.append("OS Default");
+    m_captures.append("OS Default");
+    m_playbacks.append(AudioEngine::discover_audio_devices(AUDIO_OUT));
+    m_captures.append(AudioEngine::discover_audio_devices(AUDIO_IN));
+
+    for (int i=0; i<m_playbacks.count(); i++)
+        ui->audioOutCombo->addItem(m_playbacks.at(i));
+    for (int i=0; i<m_captures.count(); i++)
+        ui->audioInCombo->addItem(m_captures.at(i));
+
     ui->vocoderCombo->clear();
     ui->modemCombo->clear();
     digihamlib->m_vocoders.clear();
@@ -946,11 +962,11 @@ void MainWindow::process_audio()
     {
         pcm[i] = digihamlib->m_rxaudioq.dequeue();
     }
-    audio->process_audio(pcm, len);
+    m_audio->write(pcm, len);
     free(pcm);
-    int level = ((float)audio->maxlevel / 32767) * 100;
-    if (!isTx)
-        ui->volumeLevelBar->setValue(level);
+ //   int level = ((float)audio->maxlevel / 32767) * 100;
+ //   if (!isTx)
+   //     ui->volumeLevelBar->setValue(level);
 }
 
 void MainWindow::update_status()
@@ -971,38 +987,46 @@ void MainWindow::updateMicLevel(qreal level)
         ui->volumeLevelBar->setValue(level * 100);
 }
 
-void MainWindow::micSendAudio(QQueue<qint16>* queue)
-{
-    while (!queue->isEmpty())
-    {
-        qint16 i = queue->dequeue();
-        if (isTx)
-            digihamlib->m_mode->m_micData.enqueue(i);
-    }
-}
-
 void MainWindow::setMicGain(int gain)
 {
-    audioinput->setMicGain(gain);
+    m_audio->set_input_volume(gain / 100.0f);
+}
+
+void MainWindow::send_mic_audio()
+{
+    int16_t pcm[160];
+    memset(pcm, 0, 160 * sizeof(int16_t));
+    m_audio->read(pcm, 160);
+    for (int i=0; i<160; i++)
+    {
+//        QApplication::processEvents();
+        digihamlib->m_mode->m_micData.enqueue(pcm[i]);
+    }
+    ui->volumeLevelBar->setValue(m_audio->level());
 }
 
 void MainWindow::start_tx(void)
 {
+    m_audio->set_input_buffer_size(640);
+    m_audio->start_capture();
     digihamlib->m_mode->m_micData.clear();
+    txtimer->start(19);
     isTx = true;
-    connect(audioinput, SIGNAL(mic_update_level(qreal)), this, SLOT(updateMicLevel(qreal)));
+//    connect(audioinput, SIGNAL(mic_update_level(qreal)), this, SLOT(updateMicLevel(qreal)));
 }
 
 void MainWindow::stop_tx(void)
 {
-    disconnect(audioinput, SIGNAL(mic_update_level(qreal)), this, SLOT(updateMicLevel(qreal)));
+    txtimer->stop();
+    m_audio->stop_capture();
+//    disconnect(audioinput, SIGNAL(mic_update_level(qreal)), this, SLOT(updateMicLevel(qreal)));
     isTx = false;
     ui->volumeLevelBar->setValue(0);
 }
 
 void MainWindow::micDeviceChanged(QAudioDevice info,int rate,int channels)
 {
-    audioinput->select_audio(info, rate, channels);
+//    audioinput->select_audio(info, rate, channels);
 } // end micDeviceChanged
 
 
