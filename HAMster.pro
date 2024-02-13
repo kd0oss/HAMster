@@ -20,8 +20,8 @@ HEADERS += \
     httpmanager.h \
     mainwindow.h
 
-FORMS += \
-    mainwindow.ui
+unix:FORMS += mainwindow.ui
+win32:FORMS += mainwindow_win.ui
 
 TRANSLATIONS += \
     HAMster_en_US.ts
@@ -33,8 +33,8 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/..//release/ -ldigihamlib
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/..//debug/ -ldigihamlib
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../build-digihamlib-Desktop_Qt_6_6_1_MinGW_64_bit-Release/release/ -ldigihamlib
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../build-digihamlib-Desktop_Qt_6_6_1_MinGW_64_bit-Debug/debug/ -ldigihamlib
 else:unix: LIBS += -L$$PWD/../build-digihamlib-Qt6_6_1-Debug/ -ldigihamlib
 
 INCLUDEPATH += $$PWD/../build-digihamlib-Qt6_6_1-Debug

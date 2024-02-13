@@ -1,5 +1,9 @@
 #include "mainwindow.h"
+#if defined(Q_OS_WIN)
+#include "ui_mainwindow_win.h"
+#else
 #include "ui_mainwindow.h"
+#endif
 #include "httpmanager.h"
 #include <QtCore>
 #include <QSerialPortInfo>
