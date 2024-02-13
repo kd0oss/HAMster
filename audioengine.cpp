@@ -74,7 +74,16 @@ void AudioEngine::init()
 	format.setChannelCount(1);
 	format.setSampleFormat(QAudioFormat::Int16);
 
-	m_agc = true;
+    if (m_outputdevice == "OS Default")
+    {
+        m_outputdevice.clear();
+    }
+    if (m_inputdevice == "OS Default")
+    {
+        m_inputdevice.clear();
+    }
+
+    m_agc = true;
 
 	QList<QAudioDevice> devices = QMediaDevices::audioOutputs();
     if (devices.size() == 0)
@@ -100,7 +109,7 @@ void AudioEngine::init()
         {
             qWarning() << "Raw audio format not supported by playback device";
         }
-
+        m_outputdevice = device.description();
         qDebug() << "Playback device: " << device.description() << "SR: " << format.sampleRate();
 
         m_out = new QAudioSink(device, format, this);
@@ -134,7 +143,7 @@ void AudioEngine::init()
         {
             qWarning() << "Raw audio format not supported by capture device";
         }
-
+        m_inputdevice = device.description();
 		int sr = 8000;
         if (MACHAK)
         {
@@ -169,14 +178,18 @@ void AudioEngine::stop_capture()
 
 void AudioEngine::start_playback()
 {
-	m_outdev = m_out->start();
+    if (m_out != nullptr)
+        m_outdev = m_out->start();
 }
 
 void AudioEngine::stop_playback()
 {
-	//m_outdev->reset();
-	m_out->reset();
-	m_out->stop();
+    if (m_out != nullptr)
+    {
+        //m_outdev->reset();
+        m_out->reset();
+        m_out->stop();
+    }
 }
 
 void AudioEngine::input_data_received()
@@ -209,6 +222,8 @@ void AudioEngine::input_data_received()
 
 void AudioEngine::write(int16_t *pcm, size_t s)
 {
+    if (m_out == nullptr) return;
+
 	m_maxlevel = 0;
     if (m_agc)
     {

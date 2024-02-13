@@ -63,9 +63,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->tgidEdit, SIGNAL(textChanged(QString)), digihamlib, SLOT(set_dmrtgid(QString)));
     connect(ui->colorCodeCombo, SIGNAL(currentIndexChanged(int)), digihamlib, SLOT(set_cc(int)));
     connect(ui->slotCombo, SIGNAL(currentIndexChanged(int)), digihamlib, SLOT(set_slot(int)));
-    connect(ui->audioInCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(micDeviceChanged(int)));
+//    connect(ui->audioInCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(micDeviceChanged(int)));
+//    connect(ui->audioOutCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(spkrDeviceChanged(int)));
     connect(ui->vocoderCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(vocoderChanged(int)));
     connect(ui->modemCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(modemChanged(int)));
+    connect(ui->m17VoiceFullRadio, SIGNAL(toggled(bool)), this, SLOT(m17_voice_rate_changed(bool)));
 
     discover_devices();
     ui->micGainSlider->setValue(90);
@@ -964,9 +966,8 @@ void MainWindow::process_audio()
     }
     m_audio->write(pcm, len);
     free(pcm);
- //   int level = ((float)audio->maxlevel / 32767) * 100;
- //   if (!isTx)
-   //     ui->volumeLevelBar->setValue(level);
+    if (!isTx)
+        ui->volumeLevelBar->setValue((m_audio->level() / 32767.0f)  * 100);
 }
 
 void MainWindow::update_status()
@@ -1002,7 +1003,8 @@ void MainWindow::send_mic_audio()
 //        QApplication::processEvents();
         digihamlib->m_mode->m_micData.enqueue(pcm[i]);
     }
-    ui->volumeLevelBar->setValue(m_audio->level());
+  //  fprintf(stderr, "Level: %f\n", m_audio->level() / 32767.0f);
+    ui->volumeLevelBar->setValue((m_audio->level() / 32767.0f)  * 100);
 }
 
 void MainWindow::start_tx(void)
@@ -1012,28 +1014,35 @@ void MainWindow::start_tx(void)
     digihamlib->m_mode->m_micData.clear();
     txtimer->start(19);
     isTx = true;
-//    connect(audioinput, SIGNAL(mic_update_level(qreal)), this, SLOT(updateMicLevel(qreal)));
 }
 
 void MainWindow::stop_tx(void)
 {
     txtimer->stop();
     m_audio->stop_capture();
-//    disconnect(audioinput, SIGNAL(mic_update_level(qreal)), this, SLOT(updateMicLevel(qreal)));
     isTx = false;
     ui->volumeLevelBar->setValue(0);
 }
 
-void MainWindow::micDeviceChanged(QAudioDevice info,int rate,int channels)
-{
-//    audioinput->select_audio(info, rate, channels);
-} // end micDeviceChanged
-
-
 void MainWindow::micDeviceChanged(int selection)
 {
     qDebug() << "Mic selected is device number: " << selection;
-    micDeviceChanged(ui->audioInCombo->itemData(selection).value<QAudioDevice >(), 8000, 1);
+//    m_audio->stop_capture();
+    m_audio->stop_playback();
+    m_audio->deleteLater();
+    m_audio = new AudioEngine(ui->audioInCombo->itemText(selection), ui->audioOutCombo->currentText());
+    m_audio->init();
+}
+
+void MainWindow::spkrDeviceChanged(int selection)
+{
+    qDebug() << "Speaker selected is device number: " << selection;
+//    m_audio->stop_capture();
+    m_audio->stop_playback();
+    m_audio->deleteLater();
+    m_audio = new AudioEngine(ui->audioInCombo->currentText(), ui->audioOutCombo->itemText(selection));
+    m_audio->init();
+    m_audio->start_playback();
 }
 
 void MainWindow::vocoderChanged(int index)
@@ -1044,4 +1053,9 @@ void MainWindow::vocoderChanged(int index)
 void MainWindow::modemChanged(int index)
 {
     digihamlib->m_modem = digihamlib->m_modems.at(index);
+}
+
+void MainWindow::m17_voice_rate_changed(bool state)
+{
+    emit digihamlib->m17_rate_changed(state);
 }

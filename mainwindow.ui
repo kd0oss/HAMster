@@ -1515,7 +1515,7 @@ border-color: rgb(170, 170, 255);</string>
                 </widget>
                </item>
                <item>
-                <widget class="QRadioButton" name="m17VoiceFullRadion">
+                <widget class="QRadioButton" name="m17VoiceFullRadio">
                  <property name="font">
                   <font>
                    <bold>true</bold>

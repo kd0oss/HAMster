@@ -48,10 +48,11 @@ private slots:
     void process_nxdn_ids();
     void process_mode_change(QString);
     void micDeviceChanged(int);
-    void micDeviceChanged(QAudioDevice info,int rate,int channels);
+    void spkrDeviceChanged(int);
     void vocoderChanged(int);
     void modemChanged(int);
     void send_mic_audio(void);
+    void m17_voice_rate_changed(bool);
 
 private:
     void save_settings();
@@ -89,5 +90,6 @@ private:
     QTimer *txtimer;
 
     bool isTx;
+signals:
 };
 #endif // MAINWINDOW_H

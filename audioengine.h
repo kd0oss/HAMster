@@ -57,7 +57,7 @@ public:
 	bool frame_available() { return (m_audioinq.size() >= 320) ? true : false; }
 	uint16_t read(int16_t *, int);
 	uint16_t read(int16_t *);
-    qreal level() { return  qreal(m_maxlevel / 32767.0f); }
+    uint16_t level() { return  m_maxlevel; }
 signals:
 
 private:
@@ -76,24 +76,11 @@ private:
 	uint16_t m_maxlevel;
 	bool m_agc;
 	float m_srm; // sample rate multiplier for macOS HACK
-
 	float m_audio_out_temp_buf[320];   //!< output of decoder
 	float *m_audio_out_temp_buf_p;
-
-	//float m_audio_out_float_buf[1120]; //!< output of upsampler - 1 frame of 160 samples upampled up to 7 times
-	//float *m_audio_out_float_buf_p;
-
 	float m_aout_max_buf[200];
 	float *m_aout_max_buf_p;
 	int m_aout_max_buf_idx;
-
-	//short m_audio_out_buf[2*48000];    //!< final result - 1s of L+R S16LE samples
-	//short *m_audio_out_buf_p;
-	//int   m_audio_out_nb_samples;
-	//int   m_audio_out_buf_size;
-	//int   m_audio_out_idx;
-	//int   m_audio_out_idx2;
-
 	float m_aout_gain;
     float m_volume;
 
