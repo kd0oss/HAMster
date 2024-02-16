@@ -73,6 +73,7 @@ private:
     QString m_audioin;
     QString m_audioout;
     QTimer *mtimer;
+    QTimer *atimer;
     bool m_update_host_files;
     QSettings *m_settings;
     QString config_path;

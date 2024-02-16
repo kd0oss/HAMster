@@ -25,6 +25,93 @@
 #define MACHAK 0
 #endif
 
+Audio_playback::Audio_playback() : QIODevice()
+{
+    pdecoded_buffer = &queue;
+}
+
+
+Audio_playback::~Audio_playback()
+{
+}
+
+
+void Audio_playback::start()
+{
+    open(QIODevice::ReadOnly);
+} // end start
+
+
+void Audio_playback::stop()
+{
+    close();
+} // end stop
+
+
+void Audio_playback::set_decoded_buffer(QQueue<qint16> *pBuffer)
+{
+    pdecoded_buffer = pBuffer;
+} // end set_decoded_buffer
+
+
+qint64 Audio_playback::readData(char *data, qint64 maxlen)
+{
+    qint64 bytes_read;
+    qint16 v;
+    int audio_byte_order = 0;
+    //   qint64 bytes_to_read = maxlen > 3000 ? 3000: maxlen;
+   // int    j=0;
+    qint64 bytes_to_read = maxlen;
+    bytes_read = 0;
+    m_maxlevel = 0;
+
+    if (pdecoded_buffer->isEmpty())
+    {
+        // probably not connected or late arrival of packets.  Send silence.
+        memset(data, 0, bytes_to_read);
+        bytes_read = bytes_to_read;
+    } else {
+        while ((!pdecoded_buffer->isEmpty()) && (bytes_read < bytes_to_read))
+        {
+         //   v = pdecoded_buffer->tryDequeue(&j);
+            v = pdecoded_buffer->dequeue();
+        //    if (j == 1)
+            {
+                if (v > m_maxlevel)
+                    m_maxlevel = v;
+                switch (audio_byte_order)
+                {
+                case 0:
+                    data[bytes_read++]=(char)(v&0xFF);
+                    data[bytes_read++]=(char)((v>>8)&0xFF);
+                    break;
+                case 1:
+                    data[bytes_read++]=(char)((v>>8)&0xFF);
+                    data[bytes_read++]=(char)(v&0xFF);
+                    break;
+                }
+            }
+        }
+        while (bytes_read < bytes_to_read) data[bytes_read++] = 0;
+    }
+    return bytes_read;
+} // end readData
+
+
+qint64 Audio_playback::writeData(const char *data, qint64 len)
+{
+    Q_UNUSED(data)
+    Q_UNUSED(len)
+    return 0;
+} // end writeData
+
+
+qint64 Audio_playback::bytesAvailable() const
+{
+    return pdecoded_buffer->count() + QIODevice::bytesAvailable();
+} // end bytesAvailable
+
+
 AudioEngine::AudioEngine(QString in, QString out) :
 	m_outputdevice(out),
 	m_inputdevice(in),
@@ -38,10 +125,15 @@ AudioEngine::AudioEngine(QString in, QString out) :
 	m_aout_max_buf_idx = 0;
 	m_aout_gain = 100;
 	m_volume = 1.0f;
+    atimer = new QTimer(this);
+    atimer->setInterval(5);
+    atimer->setSingleShot(true);
+    connect(atimer, SIGNAL(timeout()), this, SLOT(send_audio()));
 }
 
 AudioEngine::~AudioEngine()
 {
+    delete atimer;
 }
 
 QStringList AudioEngine::discover_audio_devices(uint8_t d)
@@ -85,6 +177,8 @@ void AudioEngine::init()
 
     m_agc = true;
 
+    m_playback = new Audio_playback();
+
 	QList<QAudioDevice> devices = QMediaDevices::audioOutputs();
     if (devices.size() == 0)
     {
@@ -113,7 +207,7 @@ void AudioEngine::init()
         qDebug() << "Playback device: " << device.description() << "SR: " << format.sampleRate();
 
         m_out = new QAudioSink(device, format, this);
-		m_out->setBufferSize(1280);
+        m_out->setBufferSize(1024 * 20);
 		connect(m_out, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
 	}
 
@@ -179,7 +273,11 @@ void AudioEngine::stop_capture()
 void AudioEngine::start_playback()
 {
     if (m_out != nullptr)
-        m_outdev = m_out->start();
+    {
+        atimer->start();
+        m_playback->start();
+        m_out->start(m_playback);
+    }
 }
 
 void AudioEngine::stop_playback()
@@ -187,6 +285,8 @@ void AudioEngine::stop_playback()
     if (m_out != nullptr)
     {
         //m_outdev->reset();
+        atimer->stop();
+        m_playback->stop();
         m_out->reset();
         m_out->stop();
     }
@@ -224,25 +324,16 @@ void AudioEngine::write(int16_t *pcm, size_t s)
 {
     if (m_out == nullptr) return;
 
-	m_maxlevel = 0;
     if (m_agc)
     {
-		process_audio(pcm, s);
+        process_audio(pcm, s);
 	}
 
 	size_t l = m_outdev->write((const char *) pcm, sizeof(int16_t) * s);
 
     if (l*2 < s)
     {
-		qDebug() << "AudioEngine::write() " << s << ":" << l << ":" << (int)m_out->bytesFree() << ":" << m_out->bufferSize() << ":" << m_out->error();
-	}
-
-    for (uint32_t i = 0; i < s; ++i)
-    {
-        if (pcm[i] > m_maxlevel)
-        {
-			m_maxlevel = pcm[i];
-		}
+//		qDebug() << "AudioEngine::write() " << s << ":" << l << ":" << (int)m_out->bytesFree() << ":" << m_out->bufferSize() << ":" << m_out->error();
 	}
 }
 
@@ -297,6 +388,29 @@ uint16_t AudioEngine::read(int16_t *pcm)
 	}
 
 	return s;
+}
+
+void AudioEngine::send_audio()
+{
+    int16_t pcm[160];
+    int i = 0;
+    m_maxlevel = 0;
+    memset(pcm, 0, 160 * sizeof(int16_t));
+
+    while (m_rxaudioq.size() >= 160)
+    {
+        pcm[i++] = m_rxaudioq.dequeue();
+        if (i == 160) break;
+    }
+    if (i >= 160)
+    {
+        process_audio(pcm, 160);
+        for (i=0; i<160; i++)
+            m_playback->pdecoded_buffer->enqueue(pcm[i]);
+    }
+//    write(pcm, 160);
+    atimer->start();
+    m_maxlevel = m_playback->m_maxlevel;
 }
 
 // process_audio() based on code from DSD https://github.com/szechyjs/dsd

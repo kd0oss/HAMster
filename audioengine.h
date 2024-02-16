@@ -31,9 +31,33 @@
 #include <QMediaDevices>
 #endif
 #include <QQueue>
+#include <QTimer>
 
 #define AUDIO_OUT 1
 #define AUDIO_IN  0
+
+class Audio_playback : public QIODevice
+{
+    Q_OBJECT
+public:
+    Audio_playback();
+    ~Audio_playback();
+    void start();
+    void stop();
+    qint64 readData(char *data, qint64 maxlen);
+    qint64 writeData(const char *data, qint64 len);
+    qint64 bytesAvailable() const;
+	qint16 m_maxlevel;
+    QQueue<qint16> * pdecoded_buffer;
+
+public slots:
+    void set_decoded_buffer(QQueue<qint16>* pBuffer);
+
+private:
+    QQueue<qint16>   queue;
+
+signals:
+};
 
 class AudioEngine : public QObject
 {
@@ -58,6 +82,7 @@ public:
 	uint16_t read(int16_t *, int);
 	uint16_t read(int16_t *);
     uint16_t level() { return  m_maxlevel; }
+    QQueue<int16_t> m_rxaudioq;
 signals:
 
 private:
@@ -72,7 +97,9 @@ private:
 #endif
 	QIODevice *m_outdev;
 	QIODevice *m_indev;
+	Audio_playback *m_playback;
 	QQueue<int16_t> m_audioinq;
+	QTimer *atimer;
 	uint16_t m_maxlevel;
 	bool m_agc;
 	float m_srm; // sample rate multiplier for macOS HACK
@@ -88,6 +115,7 @@ private slots:
 	void input_data_received();
 	void process_audio(int16_t *pcm, size_t s);
 	void handleStateChanged(QAudio::State newState);
+	void send_audio(void);
 };
 
 #endif // AUDIOENGINE_H

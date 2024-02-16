@@ -19,8 +19,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     m_audio->start_playback();
     m_audio->set_input_volume(0.70);
     isTx = false;
-    txtimer = new QTimer();
+    txtimer = new QTimer(this);
     connect(txtimer, SIGNAL(timeout()), this, SLOT(send_mic_audio()));
+    atimer = new QTimer(this);
+    atimer->setInterval(19);
+    atimer->setSingleShot(true);
+    connect(atimer, SIGNAL(timeout()), this, SLOT(process_audio()));
 
     ui->connectButton->setEnabled(true);
     ui->tgidEdit->setVisible(false);
@@ -75,6 +79,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     discover_devices();
     ui->micGainSlider->setValue(90);
+   // atimer->start();
 }
 
 MainWindow::~MainWindow()
@@ -956,22 +961,24 @@ void MainWindow::updateLog(QString status)
     }
     ui->processLogList->insertItem(0, status);
     ui->volumeLevelBar->setValue(0);
+    if (!digihamlib->m_gps.isEmpty())
+        fprintf(stderr, "GPSL: %s\n", digihamlib->m_gps.toLatin1().data());
 }
 
 void MainWindow::process_audio()
 {
-    int16_t *pcm = NULL;
-    int      len = digihamlib->m_rxaudioq.size();
+    int i = 0;
 
-    pcm = (int16_t*)malloc(sizeof(int16_t) * len);
-    for (int i=0; i<len; i++)
+    while (!digihamlib->m_rxaudioq.isEmpty())
     {
-        pcm[i] = digihamlib->m_rxaudioq.dequeue();
+        i++;
+        m_audio->m_rxaudioq.enqueue(digihamlib->m_rxaudioq.dequeue());
+//        QApplication::processEvents();
+        if (i == 160) break;
     }
-    m_audio->write(pcm, len);
-    free(pcm);
     if (!isTx)
         ui->volumeLevelBar->setValue((m_audio->level() / 32767.0f)  * 100);
+  //  atimer->start();
 }
 
 void MainWindow::update_status()
