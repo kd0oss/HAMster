@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     m_audio = new AudioEngine(m_audioin, m_audioout);
     m_audio->init();
-    m_audio->start_playback();
+ //   m_audio->start_playback();
     m_audio->set_input_volume(0.70);
     isTx = false;
     txtimer = new QTimer(this);
@@ -961,8 +961,8 @@ void MainWindow::updateLog(QString status)
     }
     ui->processLogList->insertItem(0, status);
     ui->volumeLevelBar->setValue(0);
-    if (!digihamlib->m_gps.isEmpty())
-        fprintf(stderr, "GPSL: %s\n", digihamlib->m_gps.toLatin1().data());
+//    if (!digihamlib->m_gps.isEmpty())
+  //      fprintf(stderr, "GPSL: %s\n", digihamlib->m_gps.toLatin1().data());
 }
 
 void MainWindow::process_audio()

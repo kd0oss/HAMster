@@ -44,17 +44,19 @@ public:
     ~Audio_playback();
     void start();
     void stop();
-    qint64 readData(char *data, qint64 maxlen);
-    qint64 writeData(const char *data, qint64 len);
-    qint64 bytesAvailable() const;
-	qint16 m_maxlevel;
-    QQueue<qint16> * pdecoded_buffer;
+    qint64 readData(char *data, qint64 maxlen) override;
+    qint64 writeData(const char *data, qint64 len) override;
+    qint64 bytesAvailable() const override;
+    qint64 size() const override { return queue.size(); }
+    qint16 m_maxlevel;
+    QQueue<qint16> *pdecoded_buffer;
+    void generateData(const QAudioFormat &format, qint64 durationUs, int sampleRate);
 
 public slots:
     void set_decoded_buffer(QQueue<qint16>* pBuffer);
 
 private:
-    QQueue<qint16>   queue;
+    QQueue<qint16> queue;
 
 signals:
 };
@@ -95,6 +97,7 @@ private:
 	QAudioSink *m_out;
 	QAudioSource *m_in;
 #endif
+    QAudioDevice spkr;
 	QIODevice *m_outdev;
 	QIODevice *m_indev;
 	Audio_playback *m_playback;
@@ -102,6 +105,7 @@ private:
 	QTimer *atimer;
 	uint16_t m_maxlevel;
 	bool m_agc;
+    bool started;
 	float m_srm; // sample rate multiplier for macOS HACK
 	float m_audio_out_temp_buf[320];   //!< output of decoder
 	float *m_audio_out_temp_buf_p;
