@@ -50,7 +50,6 @@ public:
     qint64 size() const override { return queue.size(); }
     qint16 m_maxlevel;
     QQueue<qint16> *pdecoded_buffer;
-    void generateData(const QAudioFormat &format, qint64 durationUs, int sampleRate);
 
 public slots:
     void set_decoded_buffer(QQueue<qint16>* pBuffer);

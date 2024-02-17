@@ -16,15 +16,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     m_audio = new AudioEngine(m_audioin, m_audioout);
     m_audio->init();
- //   m_audio->start_playback();
+#if !defined(Q_OS_WIN)
+    m_audio->start_playback();
+#endif
     m_audio->set_input_volume(0.70);
     isTx = false;
     txtimer = new QTimer(this);
     connect(txtimer, SIGNAL(timeout()), this, SLOT(send_mic_audio()));
-    atimer = new QTimer(this);
-    atimer->setInterval(19);
-    atimer->setSingleShot(true);
-    connect(atimer, SIGNAL(timeout()), this, SLOT(process_audio()));
 
     ui->connectButton->setEnabled(true);
     ui->tgidEdit->setVisible(false);
@@ -79,7 +77,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     discover_devices();
     ui->micGainSlider->setValue(90);
-   // atimer->start();
 }
 
 MainWindow::~MainWindow()
@@ -941,6 +938,9 @@ void MainWindow::do_connect(void)
     }
     else
     {
+#if defined(Q_OS_WIN)
+        m_audio->stop_playback();
+#endif
         ui->txButton->setEnabled(false);
         disconnect(ui->txButton, SIGNAL(pressed()), digihamlib, SLOT(press_tx()));
         disconnect(ui->txButton, SIGNAL(pressed()), this, SLOT(start_tx()));
@@ -978,7 +978,6 @@ void MainWindow::process_audio()
     }
     if (!isTx)
         ui->volumeLevelBar->setValue((m_audio->level() / 32767.0f)  * 100);
-  //  atimer->start();
 }
 
 void MainWindow::update_status()

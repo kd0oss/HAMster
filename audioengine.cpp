@@ -60,11 +60,12 @@ qint64 Audio_playback::readData(char *data, qint64 maxlen)
     qint64 bytes_read;
     qint16 v;
     int audio_byte_order = 0;
+#if defined(Q_OS_WIN)
     qint64 bytes_to_read = maxlen > 320 ? 320: maxlen;
-   // int    j=0;
-    //qint64 bytes_to_read = maxlen;
+#else
+    qint64 bytes_to_read = maxlen;
+#endif
     bytes_read = 0;
- //   m_maxlevel = 0;
 
     if (pdecoded_buffer->isEmpty())
     {
@@ -76,10 +77,7 @@ qint64 Audio_playback::readData(char *data, qint64 maxlen)
         {
          //   v = pdecoded_buffer->tryDequeue(&j);
             v = pdecoded_buffer->dequeue();
-        //    if (j == 1)
             {
-//                if (v > m_maxlevel)
-  //                  m_maxlevel = v;
                 switch (audio_byte_order)
                 {
                 case 0:
@@ -110,7 +108,11 @@ qint64 Audio_playback::writeData(const char *data, qint64 len)
 qint64 Audio_playback::bytesAvailable() const
 {
  //   qDebug("Size: %ld", (long int)(QIODevice::bytesAvailable()));
-    return 320; //(pdecoded_buffer->size() * sizeof(qint16)) + QIODevice::bytesAvailable();
+#if defined(Q_OS_WIN)
+    return 320;
+#else
+    return (pdecoded_buffer->size() * sizeof(qint16)) + QIODevice::bytesAvailable();
+#endif
 } // end bytesAvailable
 
 
@@ -285,7 +287,6 @@ void AudioEngine::start_playback()
     {
       //  atimer->start();
         m_playback->start();
-   //   qDebug("Bytes: %ld\n", (long int)m_playback->bytesAvailable());
         m_out->start(m_playback);
     }
 }
@@ -404,10 +405,7 @@ void AudioEngine::send_audio()
 {
     int16_t pcm[160];
     int i = 0;
- //   static bool started;
-    m_maxlevel = 0;
     memset(pcm, 0, 160 * sizeof(int16_t));
-//    memset(pcm+(79 * sizeof(int16_t)), 100, 80 * sizeof(int16_t));
 
     while (m_rxaudioq.size() >= 160)
     {
@@ -416,6 +414,7 @@ void AudioEngine::send_audio()
     }
     if (i >= 160)
     {
+        m_maxlevel = 0;
         process_audio(pcm, 160);
         for (i=0; i<160; i++)
         {
@@ -423,11 +422,13 @@ void AudioEngine::send_audio()
                 m_maxlevel = pcm[i];
             m_playback->pdecoded_buffer->enqueue(pcm[i]);
         }
+#if defined(Q_OS_WIN)
         if (!started)
         {
             started = true;
             start_playback();
         }
+#endif
     }
     atimer->start();
 }
@@ -551,11 +552,15 @@ void AudioEngine::handleStateChanged(QAudio::State newState)
 		break;
 	case QAudio::IdleState:
         qDebug() << "AudioOut state idle";
+#if defined(Q_OS_WIN)
         stop_playback();
+#endif
 		break;
 	case QAudio::StoppedState:
         qDebug() << "AudioOut state stopped";
+#if defined(Q_OS_WIN)
         started = false;
+#endif
         break;
 	default:
 		break;
